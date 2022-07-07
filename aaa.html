@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" integrity="sha512-GQGU0fMMi238uA+a/bdWJfpUGKUkBdgfFdgBm72SUQ6BeyWjoY/ton0tEjH+OSH9iP4Dfh+7HM0I9f5eR0L/4w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+    </style>
+</head>
+<body>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+
+    <script>
+        $(document).ready(function() {
+            
+            
+            
+            
+            $("#edit-button1").click(function() {
+                $("#input1").removeAttr("readonly");
+                $("#textarea1").removeAttr("readonly");
+                $("#modify-submit1").removeClass("d-none");
+                $("#delete-submit1").removeClass("d-none");
+            });
+            
+            $("#delete-submit1").click(function(e) {
+                e.preventDefault();
+                
+                if (confirm("삭제하시겠습니까?")) {
+                    let form1 = $("#form1");
+                    let actionAttr = "${appRoot}/board/remove";
+                    form1.attr("action", actionAttr);
+                    
+                    form1.submit();
+                }
+                
+            });
+            
+            // reply-edit-toggle 버튼 클릭시 댓글 보여주는 div 숨기고,
+            // 수정 form 보여주기
+            /* $(".reply-edit-toggle-button").click(function() {
+                console.log("버튼클릭");
+                const replyId = $(this).attr("data-reply-id");
+                const displayDivId = "#replyDisplayContainer" + replyId;
+                const editFormId = "#replyEditFormContainer" + replyId;
+                
+                console.log(replyId);
+                console.log(displayDivId);
+                console.log(editFormId);
+                
+                $(displayDivId).hide();
+                $(editFormId).show();
+            }); */
+            
+            // reply-delete-button 클릭시
+            /* $(".reply-delete-button").click(function() { // 페이지 로딩 이후에 id 가 등장해서 클릭 이 작동안함 클릭이 작동할려면 페이지 완성 직후에 이 아이디가 존재 해야함!!!
+                                                        // 1. page load 2. add event handler 3. ajax  -> reponse 4. reply list 결론 버튼이 생기고 2번이 실행 되어야함
+                const replyId = $(this).attr("data-reply-id");
+                const message = "댓글을 삭제하시겠습니까?";
+                
+                if (confirm(message)) {
+                    $("#replyDeleteInput1").val(replyId);
+                    $("#replyDeleteForm1").submit();
+                }
+            }); */
+            
+            
+            
+            
+            const listReply = function () {
+                
+         // 페이지 로딩 후 reply list 가져오는 ajax 요청
+            
+            const data = {boardId : ${board.id}};
+            $.ajax({
+                url : "${appRoot}/reply/list",
+                type : "get",
+                data : data,
+                success : function(list) {
+                    console.log(list);
+                    const replyListhere = $("#replylist");
+                     replyListhere.empty();
+                     
+                    // 댓글 개수 표시
+                        $("#replynum").text(list.length);
+                    for (let i = 0; i < list.length; i++) {
+                        const replyElement = $("<li />");
+                        replyElement.html(`
+                                
+                                
+                                
+                                <div id="replyDisplayContainer\${list[i].id }">
+                                <div class="fw-bold">
+                                    <i class="fa-solid fa-comment"></i> 
+                                    \${list[i].prettyInserted}
+                                     <span class="reply-edit-toggle-button badge bg-info text-dark" id="replyEditToggleButton\${list[i].id }" data-reply-id="\${list[i].id }" >
+                                         <i class="fa-solid fa-pen-to-square"></i>
+                                     </span>
+                                     <span class="reply-delete-button badge bg-danger" data-reply-id="\${list[i].id }">
+                                         <i class="fa-solid fa-trash-can"></i>
+                                     </span>
+                                </div>
+                                 \${list[i].content }
+                                 
+                                 
+                            </div>
+                            
+                            <div id="replyEditFormContainer\${list[i].id }" style="display: none;">
+                                <form action="${appRoot }/reply/modify" method="post">
+                                    <div class="input-group">
+                                        <input type="hidden" name="boardId" value="${board.id }" />
+                                        <input type="hidden" name="id" value="\${list[i].id }" />
+                                        <input class="form-control" value="\${list[i].content }" type="text" name="content" required /> 
+                                        <button data-reply-id ="\${list[i].id}" class="reply-modify-submit btn btn-outline-secondary"><i class="fa-solid fa-comment-dots"></i></button>
+                                    </div>
+                                </form>
+                            </div>
+                             
+                             
+                        
+                        
+                        `); // replyElement = $("<li />"); 속에 .text로 list[i].content 추가이후 replyListhere.append(replyElement);로 <ul> 태그 속에 추가  
+                                                           //`` 백틱 쓰면 엔터 이런거 상관없이 사용가능  또한 `${i}` 이런식으로 el 로출력 ` \${i}` 이렇게 \ 사용하면 자바 스크립트의 값 출력 
+                        replyListhere.append(replyElement);
+                        // 삭제 버튼 에드 이벤트 위치!!
+                    } // end of for
+                },
+    
+                error : function() {
+                    console.log("댓글 가져오기 실패");
+                    }
+                })
+             }
+            
+                    
+                    $(".reply-modify-submit").click(function(e){
+                        e.preventDefault();
+                        
+                        const id =$(this).attr("data-reply-id");
+                        const formElem = $("#replyEditFormContainer" + id).find("form");
+                        // const data = formElem.serialize();// put 방식은 못 controller에서 못받음 json 형식으로 보내야함
+                        const data ={
+                                boardId : formElem.find("[name=bardId]").val(), 
+                                id : formElem.find("[name=id]").val(), 
+                                content : formElem.find("[name=content]").val()
+                        };
+                        
+                        $.ajax({
+                            url : "${appRoot}/reply/modify" , 
+                            type : "put" ,
+                            data : JSON.stringify(data),
+                            contentType : "application/json",
+                            success : function(data){
+                                console.log("수정 성공");
+                            },
+                            error : function (){
+                                console.log("수정 실패");
+                            }
+                             
+                            
+                        });
+                    });
+        
+                      // 댓글 수정위치
+                    $(".reply-edit-toggle-button").click(function() {
+                        console.log("버튼클릭");
+                        const replyId = $(this).attr("data-reply-id");
+                        const displayDivId = "#replyDisplayContainer" + replyId;
+                        const editFormId = "#replyEditFormContainer" + replyId;
+                        
+                        console.log(replyId);
+                        console.log(displayDivId);
+                        console.log(editFormId);
+                        
+                        $(displayDivId).hide();
+                        $(editFormId).show();
+                    });
+                    
+                        $(".reply-delete-button").click(function() { // 페이지 로딩 이후에 id 가 등장해서 클릭 이 작동안함 클릭이 작동할려면 페이지 완성 직후에 이 아이디가 존재 해야함!!!
+                            // 1. page load 2. add event handler 3. ajax  -> reponse 4. reply list 결론 버튼이 생기고 2번이 실행 되어야함
+                                    const replyId = $(this).attr("data-reply-id");
+                                    const message = "댓글을 삭제하시겠습니까?";
+    
+                                     if (confirm(message)) {
+                                     /* $("#replyDeleteInput1").val(replyId); */
+                                    /*$("#replyDeleteForm1").submit(); */
+                                    
+                                    
+                                    
+                                    $.ajax({
+                                        url : "${appRoot}/reply/delete/"+ replyId,
+                                        type : "delete",
+                                            success : function(data) {
+                                                console.log(replyId + "댓글 삭제됨");
+                                                // 댓글 list refresh
+                                                listReply(); // 댓글 새로 고침
+                                                //메시지 출력
+                                                $("#replyMessage1").show().text(data).fadeOut(3000);
+                                            },
+                                        error : function(){
+                                            console.log(replyId+"삭제중 에러 발생")
+                                        },
+                                        complete : function(){
+                                            console.log(replyId+"삭제 요청 끝")
+                                        }
+                                    });
+                                        } 
+                                    });
+                
+        });
+            
+            
+            // 댓글 가져오기 함수 실행
+            listReply();
+            // addReplySumitbutton1 버튼 클릭시 ajax 댓글 추가 요청
+            $("#addReplySumitbutton1").click(function(e){
+                e.preventDefault();
+                
+                const data = $("#insertReplyForm1").serialize();
+                
+                $.ajax({
+                    url : "${appRoot }/reply/insert",
+                    type : "post",
+                    data : data,
+                    success : function(data) {
+                        // 새 댓글 등록되었다는 메시지 출력
+                        $("#replyMessage1").show().text(data).fadeOut(3000);
+                        
+                        // text input 초기화 
+                        $(insertReplyContentInput).val("");
+                        
+                        // 모든 댓글 가져오는 ajax 요청 
+                        
+                        listReply();
+                        //console.log(data);
+                    },
+                    error : function() {
+                        console.log("문제 발생");
+                    },
+                    complete : function() {
+                        console.log("요청 완료");
+                    
+                    }
+                });
+            });
+        
+        
+    
+    </script>
+</body>
+</html>
